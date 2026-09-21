@@ -1,5 +1,4 @@
-/* components.js – shared layout and reusable UI pieces.
-   Each page has a <main> element; buildShell() wraps it with the sidebar and header. */
+/* components.js – shared layout and reusable UI pieces for FMS */
 
 /* ---------- Small helpers ---------- */
 
@@ -13,40 +12,40 @@ function esc(v) {
   });
 }
 
-// index.html sits in the project root; every other page lives in html/.
-// Pages inside html/ set <body data-root="../">, so links resolve from either location.
 function pageHref(file) {
   var inSubdir = document.body.dataset.root === '../';
-  if (file === 'index.html') return (inSubdir ? '../' : '') + file;
+  if (file.indexOf('index.html') !== -1) return (inSubdir ? '../' : '') + file;
   return (inSubdir ? '' : 'html/') + file;
 }
 
 function inr(n) {
-  var hasPaise = Number(n) % 1 !== 0;
-  return '₹' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: hasPaise ? 2 : 0, maximumFractionDigits: 2 });
+  var num = Number(n) || 0;
+  var hasPaise = num % 1 !== 0;
+  return '₹' + num.toLocaleString('en-IN', { minimumFractionDigits: hasPaise ? 2 : 0, maximumFractionDigits: 2 });
 }
 
 function fmtDate(d) {
-  return new Date(d).toLocaleString('en-IN', {
+  var dateObj = new Date(d);
+  if (isNaN(dateObj.getTime())) return String(d || '—');
+  return dateObj.toLocaleString('en-IN', {
     day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true
   });
 }
 
 function fmtTime(d) {
-  return new Date(d).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  var dateObj = new Date(d);
+  if (isNaN(dateObj.getTime())) return '—';
+  return dateObj.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
 }
-
-function isToday(d) { return new Date(d).toDateString() === new Date().toDateString(); }
 
 /* ---------- Icons ---------- */
 
 const ICONS = {
-  dashboard: '<rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>',
+  dashboard: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
   transactions: '<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
   alerts: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
-  cases: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
-  investigation: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
-  settings: '<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>',
+  briefcase: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+  search: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
   sun: '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
   moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
   menu: '<line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>',
@@ -57,17 +56,16 @@ const ICONS = {
 function icon(name, size, extraClass) {
   size = size || 20;
   return '<svg class="icon ' + (extraClass || '') + '" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" ' +
-    'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[name] + '</svg>';
+    'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[name] || ICONS.dashboard) + '</svg>';
 }
 
-/* ---------- Badges & links ---------- */
+/* ---------- Badges & Links ---------- */
 
 function SeverityBadge(sev) { return '<span class="badge sev sev-' + slug(sev) + '">' + esc(sev) + '</span>'; }
 function StatusBadge(status) { return '<span class="badge status status-' + slug(status) + '">' + esc(status) + '</span>'; }
 
-function txnLink(id) { return '<a class="link" href="' + pageHref('transactions.html?id=' + esc(id)) + '">' + esc(id) + '</a>'; }
-function alertLink(id) { return '<a class="link" href="' + pageHref('alerts.html?id=' + esc(id)) + '">' + esc(id) + '</a>'; }
-function caseLink(id) { return '<a class="link" href="' + pageHref('cases.html?id=' + esc(id)) + '">' + esc(id) + '</a>'; }
+function txnLink(id) { return '<a class="link" href="' + pageHref('transactions.html?id=' + encodeURIComponent(id)) + '">' + esc(id) + '</a>'; }
+function alertLink(id) { return '<a class="link" href="' + pageHref('alerts.html?id=' + encodeURIComponent(id)) + '">' + esc(id) + '</a>'; }
 
 function details(pairs, cols) {
   return '<dl class="details' + (cols ? ' cols' : '') + '">' + pairs.map(function (p) {
@@ -75,17 +73,20 @@ function details(pairs, cols) {
   }).join('') + '</dl>';
 }
 
-/* ---------- KPI card ---------- */
+/* ---------- KPI Card ---------- */
 
 function KpiCard(cfg) {
-  return '<a class="card kpi ' + (cfg.tone ? 'kpi-' + cfg.tone : '') + '" href="' + cfg.href + '">' +
+  var tag = cfg.href ? 'a' : 'div';
+  return '<' + tag + ' class="card kpi ' + (cfg.tone ? 'kpi-' + cfg.tone : '') + '"' + (cfg.href ? ' href="' + cfg.href + '"' : '') + '>' +
     '<div class="kpi-icon">' + icon(cfg.icon, 22) + '</div>' +
-    '<div><div class="kpi-label">' + esc(cfg.label) + '</div>' +
-    '<div class="kpi-value">' + esc(cfg.value) + '</div>' +
-    '<div class="kpi-hint">' + esc(cfg.hint) + '</div></div></a>';
+    '<div class="kpi-body">' +
+      '<div class="kpi-label">' + esc(cfg.label) + '</div>' +
+      '<div class="kpi-value">' + esc(cfg.value) + '</div>' +
+      '<div class="kpi-hint">' + esc(cfg.hint) + '</div>' +
+    '</div></' + tag + '>';
 }
 
-/* ---------- Loading spinner ---------- */
+/* ---------- Loading Spinner & Error States ---------- */
 
 function Spinner() {
   return '<div class="spinner-wrap"><div class="spinner" role="status" aria-label="Loading"></div></div>';
@@ -97,28 +98,18 @@ function ErrorCard(err) {
     '<button type="button" class="btn btn-ghost" data-retry>Try again</button></div>';
 }
 
-// Shows a spinner in each mount, then runs work() (which may be async and fetch from the API).
-// If it fails, the first mount shows the error with a retry button.
 function loadThen(mounts, work) {
   mounts = [].concat(mounts);
-  mounts.forEach(function (m) { m.innerHTML = Spinner(); });
+  mounts.forEach(function (m) { if (m) m.innerHTML = Spinner(); });
   Promise.resolve().then(work).catch(function (err) {
-    console.error(err);
-    mounts.forEach(function (m, i) { m.innerHTML = i === 0 ? ErrorCard(err) : ''; });
-    var retry = mounts[0].querySelector('[data-retry]');
+    console.warn('Data load note:', err);
+    mounts.forEach(function (m, i) { if (m) m.innerHTML = i === 0 ? ErrorCard(err) : ''; });
+    var retry = mounts[0] && mounts[0].querySelector('[data-retry]');
     if (retry) retry.addEventListener('click', function () { location.reload(); });
   });
 }
 
-/* ---------- Data table (used for Transactions, Alerts, Cases and widgets) ----------
-   cfg = {
-     columns:  [{ label, render(row) -> html, className }],
-     rows:     [...],
-     searchKeys?:  ['id', 'status'],     // adds a search box
-     filters?:     [{ key, label, options, value? }],   // adds dropdown filters
-     onRowClick?:  function (row),
-     emptyText?:   string
-   } */
+/* ---------- Data Table ---------- */
 
 function DataTable(mount, cfg) {
   var filters = cfg.filters || [];
@@ -192,7 +183,7 @@ function DataTable(mount, cfg) {
   draw();
 }
 
-/* ---------- Detail drawer ---------- */
+/* ---------- Detail Drawer ---------- */
 
 var lastFocus = null;
 
@@ -216,26 +207,25 @@ function closeDrawer() {
   if (lastFocus && lastFocus.focus) lastFocus.focus();
 }
 
-/* ---------- Page shell: sidebar + header ---------- */
+/* ---------- Page Shell (Sidebar + Header) ----------
+   Keep strictly Dashboard, Transactions, Alerts navigation as requested */
 
 const NAV = [
   { page: 'dashboard', href: pageHref('index.html'), label: 'Dashboard', icon: 'dashboard' },
   { page: 'transactions', href: pageHref('transactions.html'), label: 'Transactions', icon: 'transactions' },
-  { page: 'alerts', href: pageHref('alerts.html'), label: 'Alerts', icon: 'alerts' },
-  { page: 'cases', href: pageHref('cases.html'), label: 'Cases', icon: 'cases' },
-  { page: 'investigation', href: pageHref('investigation.html'), label: 'Investigation', icon: 'investigation' },
-  { page: 'settings', href: pageHref('settings.html'), label: 'Settings', icon: 'settings' }
+  { page: 'alerts', href: pageHref('alerts.html'), label: 'Alerts', icon: 'alerts' }
 ];
 
 function buildShell() {
   var page = document.body.dataset.page;
-  var title = document.body.dataset.title || 'FMS';
+  var title = document.body.dataset.title || 'Dashboard';
   var main = $('main');
 
-  var nav = NAV.map(function (n) {
+  var navHtml = NAV.map(function (n) {
     var active = n.page === page;
-    return '<a class="nav-link' + (active ? ' active' : '') + '" href="' + n.href + '"' + (active ? ' aria-current="page"' : '') + '>' +
-      icon(n.icon) + '<span>' + n.label + '</span>' +
+    return '<a class="nav-link' + (active ? ' active' : '') + '" href="' + n.href + '"' +
+      (active ? ' aria-current="page"' : '') + '>' +
+      icon(n.icon, 19) + '<span>' + n.label + '</span>' +
       (n.page === 'alerts' ? '<span class="nav-count" id="nav-alert-count" hidden></span>' : '') +
       '</a>';
   }).join('');
@@ -243,20 +233,22 @@ function buildShell() {
   var shell = document.createElement('div');
   shell.innerHTML =
     '<aside class="sidebar" id="sidebar">' +
-      '<a class="brand" href="' + pageHref('index.html') + '"><span class="brand-mark">FMS</span>' +
-      '<span><span class="brand-name">FMS</span><br><span class="brand-sub">Financial Monitoring</span></span></a>' +
-      '<nav class="nav" aria-label="Main">' + nav + '</nav>' +
+      '<a class="brand" href="' + pageHref('index.html') + '">' +
+        '<span class="brand-mark">FMS</span>' +
+        '<span><span class="brand-name">FMS</span><br><span class="brand-sub">Financial Monitoring</span></span>' +
+      '</a>' +
+      '<nav class="nav" aria-label="Main Navigation">' + navHtml + '</nav>' +
       '<div class="sidebar-foot">FMS demo · live data</div>' +
     '</aside>' +
     '<div class="sidebar-backdrop" id="sidebar-backdrop"></div>' +
     '<div class="main-col">' +
       '<header class="header">' +
-        '<button class="icon-btn menu-btn" id="menu-btn" aria-label="Open menu">' + icon('menu') + '</button>' +
+        '<button class="icon-btn menu-btn" id="menu-btn" aria-label="Open menu">' + icon('menu', 18) + '</button>' +
         '<h1>' + esc(title) + '</h1>' +
-        '<span class="header-date">' + new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + '</span>' +
+        '<span class="header-date">' + new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + '</span>' +
         '<div class="header-right">' +
           '<span class="live-pill" id="api-pill"><span class="live-dot wait" id="api-dot"></span><span id="api-text">Connecting…</span></span>' +
-          '<button class="icon-btn" id="theme-toggle" aria-label="Toggle light / dark theme">' + icon('moon', 18, 'icon-moon') + icon('sun', 18, 'icon-sun') + '</button>' +
+          '<button class="icon-btn" id="theme-toggle" aria-label="Toggle light / dark theme">' + icon('moon', 17, 'icon-moon') + icon('sun', 17, 'icon-sun') + '</button>' +
           '<span class="avatar" title="Fraud Analyst">FA</span>' +
         '</div>' +
       '</header>' +
@@ -264,13 +256,14 @@ function buildShell() {
     '</div>' +
     '<div class="overlay" id="overlay"></div>' +
     '<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" aria-hidden="true">' +
-      '<div class="drawer-head"><div><h2 id="drawer-title"></h2><div class="drawer-sub" id="drawer-sub"></div></div>' +
-      '<button class="icon-btn" id="drawer-close" aria-label="Close details">' + icon('close') + '</button></div>' +
+      '<div class="drawer-head">' +
+        '<div><h2 id="drawer-title"></h2><div class="drawer-sub" id="drawer-sub"></div></div>' +
+        '<button class="icon-btn" id="drawer-close" aria-label="Close details">' + icon('close', 18) + '</button>' +
+      '</div>' +
       '<div class="drawer-body" id="drawer-body"></div>' +
       '<div class="drawer-actions" id="drawer-actions" hidden></div>' +
     '</aside>';
 
-  // Place the shell before <main>, then move <main> into the content area.
   while (shell.firstChild) document.body.insertBefore(shell.firstChild, main);
   $('#content').appendChild(main);
 
@@ -287,24 +280,29 @@ function buildShell() {
   });
 }
 
-/* ---------- Live backend status (header pill + unresolved-alert count) ---------- */
+/* ---------- Live Backend Status Sync ---------- */
 
 function refreshBackendStatus() {
   FMS.health().then(function () {
-    $('#api-dot').className = 'live-dot';
-    $('#api-text').textContent = 'Backend connected';
+    var dot = $('#api-dot');
+    var txt = $('#api-text');
+    if (dot) dot.className = 'live-dot';
+    if (txt) txt.textContent = 'Backend connected';
   }, function () {
-    $('#api-dot').className = 'live-dot off';
-    $('#api-text').textContent = 'Backend offline';
+    var dot = $('#api-dot');
+    var txt = $('#api-text');
+    if (dot) dot.className = 'live-dot off';
+    if (txt) txt.textContent = 'Backend offline';
   });
 
   FMS.alerts({ status: 'Open', limit: 1 }).then(function (d) {
     var badge = $('#nav-alert-count');
-    if (!badge) return;
-    badge.textContent = d.total;
-    badge.title = d.total + ' open alerts';
-    badge.hidden = !d.total;
-  }, function () { /* the pill already shows the outage */ });
+    if (badge) {
+      badge.textContent = d.total || '0';
+      badge.title = (d.total || 0) + ' open alerts';
+      badge.hidden = !d.total;
+    }
+  }).catch(function () {});
 }
 
 buildShell();

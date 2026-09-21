@@ -1,4 +1,4 @@
-/* alerts.js – alert table and detail drawer (data from GET /api/alerts) */
+/* alerts.js – alert table and detail drawer (data strictly from GET /api/alerts) */
 
 (function () {
   var mount = $('#table');
@@ -9,26 +9,26 @@
     openDrawer({ title: id, body: Spinner() });
 
     var d;
-    try { d = await FMS.alert(id); }
-    catch (err) { if (token === openToken) $('#drawer-body').innerHTML = '<p class="muted">' + esc(err.message) + '</p>'; return; }
+    try {
+      d = await FMS.alert(id);
+    } catch (err) {
+      if (token === openToken) {
+        $('#drawer-body').innerHTML = '<p class="muted">' + esc(err.message) + '</p>';
+      }
+      return;
+    }
     if (token !== openToken) return;
 
-    var a = d.alert, c = d.case;
+    var a = d.alert;
     $('#drawer-sub').innerHTML = SeverityBadge(a.severity) + StatusBadge(a.status);
-    $('#drawer-body').innerHTML = '<p class="alert-desc">' + esc(a.description) + '</p>' + details([
+    $('#drawer-body').innerHTML = '<p class="alert-desc" style="margin-bottom:16px;">' + esc(a.description) + '</p>' + details([
       ['Alert ID', esc(a.id)],
       ['Alert Type', esc(a.type)],
       ['Severity', SeverityBadge(a.severity)],
       ['Status', StatusBadge(a.status)],
       ['Created', fmtDate(a.date)],
-      ['Transaction', txnLink(a.relatedTxn) + ' · ' + inr(d.txn.amount)],
-      ['Case', c ? caseLink(c.id) : '<span class="muted">No case opened</span>']
+      ['Transaction', txnLink(a.relatedTxn) + ' · ' + inr(d.txn ? d.txn.amount : 0)]
     ], true);
-
-    $('#drawer-actions').hidden = false;
-    $('#drawer-actions').innerHTML = c
-      ? '<a class="btn btn-primary" href="' + pageHref('cases.html?id=' + esc(c.id)) + '">Open case ' + esc(c.id) + ' ' + icon('arrow', 16) + '</a>'
-      : '<span class="muted">No case has been opened for this alert yet.</span>';
   }
 
   loadThen(mount, async function () {

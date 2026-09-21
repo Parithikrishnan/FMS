@@ -5,7 +5,7 @@ cases, and a **plain HTML / CSS / JavaScript** frontend (no build step) that sho
 
 ```
 backend/    Flask REST API (Flask-RESTX, SQLAlchemy) · Swagger UI at /api/docs
-frontend/   Static pages: Dashboard, Transactions, Alerts, Cases, Investigation, Settings
+frontend/   Static pages: Dashboard, Transactions, Alerts
 ```
 
 ## How they are linked
@@ -20,7 +20,8 @@ frontend/   Static pages: Dashboard, Transactions, Alerts, Cases, Investigation,
   [frontend/js/api.js](frontend/js/api.js); the base URL is set in [frontend/js/config.js](frontend/js/config.js).
 - The header shows **Backend connected / offline**, checked live against `GET /api/health`.
 - Data flow: the banking app posts `POST /api/events` → the backend checks its fraud rule → raises an **alert**
-  → opens a **case** → the frontend displays them. Investigators record **findings** on a case.
+  → opens a **case** → the frontend displays the alert and transaction. (Cases and findings live in the backend
+  API only; the frontend has no Cases, Investigation or Settings pages.)
 
 ## Run it (Docker)
 
@@ -67,10 +68,9 @@ Full schema and a try-it console: `/api/docs`.
 ## Demo walkthrough
 
 1. **Dashboard** – Critical Alerts = 1.
-2. Open **ALERT-1001** → **Open case CASE-1001** → **Open investigation**.
-3. **Transactions** tab: TXN-10045 modified, ₹10,000 → ₹50,000, with its audit trail.
-4. **Findings** tab: view or **Add finding**.
-5. **Settings → Demo: simulate a banking event** raises a new alert and case live.
+2. Open **ALERT-1001** on the **Alerts** page to see its description and transaction.
+3. **Transactions** page: TXN-10045 modified, ₹10,000 → ₹50,000, with its audit trail.
+4. To raise a new alert live, `POST /api/events` (try it in Swagger UI at `/api/docs`).
 
 ## Notes
 
@@ -78,4 +78,4 @@ Full schema and a try-it console: `/api/docs`.
   audit trail lists the modification before the alert it triggered.
 - `frontend/` pages: `index.html` (dashboard) at the root, the rest in `frontend/html/`. Links built in JavaScript
   go through `pageHref()` in `frontend/js/components.js`.
-- Notification switches and the theme on the Settings page are stored in the browser only.
+- The light/dark theme toggle is in the header and is stored in the browser only.

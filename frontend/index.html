@@ -9,31 +9,45 @@
 </head>
 <body data-page="dashboard" data-title="Dashboard">
   <main>
-    <p class="page-desc">Overview of suspicious activity, open alerts and investigations.</p>
+    <p class="page-desc">Overview of suspicious activity, open alerts and transactions.</p>
 
+    <!-- Key Metrics Grid -->
     <section class="kpi-grid" id="kpis" aria-label="Key metrics"></section>
 
+    <!-- Recent Alerts & Transactions -->
     <section class="grid-2">
       <div class="card">
-        <div class="card-head"><h2>Recent Alerts</h2><a class="link" href="html/alerts.html">View all</a></div>
+        <div class="card-head">
+          <h2>Recent Alerts</h2>
+          <a class="link" href="html/alerts.html">View all →</a>
+        </div>
         <div id="recent-alerts"></div>
       </div>
       <div class="card">
-        <div class="card-head"><h2>Recent Transactions</h2><a class="link" href="html/transactions.html">View all</a></div>
+        <div class="card-head">
+          <h2>Recent Transactions</h2>
+          <a class="link" href="html/transactions.html">View all →</a>
+        </div>
         <div id="recent-transactions"></div>
       </div>
     </section>
 
+    <!-- Charts Grid -->
     <section class="grid-2">
       <div class="card">
         <div class="card-head">
           <h2>Transactions, last 7 days</h2>
-          <div class="legend"><span style="--c: var(--chart-2)">All</span><span style="--c: var(--chart-1)">Suspicious</span></div>
+          <div class="legend">
+            <span style="--c: var(--chart-2)">All</span>
+            <span style="--c: var(--chart-1)">Suspicious</span>
+          </div>
         </div>
         <div class="card-body" id="chart-week"></div>
       </div>
       <div class="card">
-        <div class="card-head"><h2>Alerts by severity</h2></div>
+        <div class="card-head">
+          <h2>Alerts by severity</h2>
+        </div>
         <div class="card-body" id="chart-severity"></div>
       </div>
     </section>

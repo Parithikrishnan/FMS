@@ -1,20 +1,25 @@
-/* transactions.js – transaction table and detail drawer (data from GET /api/transactions) */
+/* transactions.js – transaction table and detail drawer (data strictly from GET /api/transactions) */
 
 (function () {
   var mount = $('#table');
-  var openToken = 0;   // ignore a slow response if another row was opened meanwhile
+  var openToken = 0;
 
   async function openTransaction(id) {
     var token = ++openToken;
     openDrawer({ title: id, body: Spinner() });
 
     var t;
-    try { t = await FMS.transaction(id); }
-    catch (err) { if (token === openToken) $('#drawer-body').innerHTML = '<p class="muted">' + esc(err.message) + '</p>'; return; }
+    try {
+      t = await FMS.transaction(id);
+    } catch (err) {
+      if (token === openToken) {
+        $('#drawer-body').innerHTML = '<p class="muted">' + esc(err.message) + '</p>';
+      }
+      return;
+    }
     if (token !== openToken) return;
 
-    var alert = t.alerts[0];
-    var relatedCase = t.cases[0];
+    var alert = t.alerts && t.alerts[0];
 
     var body = details([
       ['Transaction ID', esc(t.id)],
@@ -27,22 +32,19 @@
 
     if (alert) {
       body += '<h3 class="section-title">Related</h3>' + details([
-        ['Alert', alertLink(alert.id) + ' · ' + SeverityBadge(alert.severity)],
-        ['Case', relatedCase ? caseLink(relatedCase.id) : '<span class="muted">No case opened</span>']
+        ['Alert', alertLink(alert.id) + ' · ' + SeverityBadge(alert.severity)]
       ], true);
     }
 
-    body += '<h3 class="section-title">Audit trail</h3><ol class="timeline">' + t.history.map(function (h) {
-      return '<li><div class="tl-event">' + esc(h.event) + '</div><div class="tl-detail">' + esc(h.detail) + '</div>' +
-        '<div class="tl-time">' + fmtDate(h.date) + '</div></li>';
-    }).join('') + '</ol>';
+    if (t.history && t.history.length) {
+      body += '<h3 class="section-title">Audit trail</h3><ol class="timeline">' + t.history.map(function (h) {
+        return '<li><div class="tl-event">' + esc(h.event) + '</div><div class="tl-detail">' + esc(h.detail) + '</div>' +
+          '<div class="tl-time">' + fmtDate(h.date) + '</div></li>';
+      }).join('') + '</ol>';
+    }
 
     $('#drawer-sub').innerHTML = StatusBadge(t.status);
     $('#drawer-body').innerHTML = body;
-    if (relatedCase) {
-      $('#drawer-actions').innerHTML = '<a class="btn btn-primary" href="' + pageHref('investigation.html?case=' + esc(relatedCase.id)) + '">Open investigation</a>';
-      $('#drawer-actions').hidden = false;
-    }
   }
 
   loadThen(mount, async function () {
