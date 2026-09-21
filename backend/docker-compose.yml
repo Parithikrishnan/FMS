@@ -1,0 +1,51 @@
+# FMS - Financial Monitoring System.   Run from this folder:   docker compose up --build
+# Then open  http://localhost  (or http://localhost:$FMS_PORT).
+#
+#   browser --> nginx :80 --+-- /      static frontend  (../frontend)
+#                           +-- /api/  Flask backend    (this folder) --> PostgreSQL
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-fms}
+      POSTGRES_USER: ${DB_USER:-fms}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-fms123}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-fms} -d ${DB_NAME:-fms}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: .
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-fms}
+      DB_USER: ${DB_USER:-fms}
+      DB_PASSWORD: ${DB_PASSWORD:-fms123}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "${FMS_PORT:-80}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../frontend:/usr/share/nginx/html:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  pgdata:
