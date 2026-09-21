@@ -89,6 +89,8 @@ def process_event(payload: dict) -> dict:
         txn.modified_by = event["modified_by"]
         txn.source_ip = event["source_ip"]
         txn.status = STATUS_SUSPICIOUS
+        # Insert the modification first so its timestamp precedes the alert's and case's (audit-trail order).
+        db.session.flush()
 
         alert = alert_service.create_integrity_alert(
             txn, event["old_amount"], event["new_amount"], event["modified_by"], event["source_ip"]

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Investigation · FMS</title>
+  <script src="../js/theme.js"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../" data-page="investigation" data-title="Investigation">
+  <main>
+    <div class="inv-top">
+      <p class="page-desc" style="margin:0">Review the alert, the transactions involved, and record what you find.</p>
+      <label>Case <select class="input" id="case-select" aria-label="Choose a case"></select></label>
+    </div>
+
+    <ol class="flow" id="flow" aria-label="Investigation flow"></ol>
+    <div class="card case-summary card-body" id="case-summary"></div>
+
+    <div class="tabs" id="tabs" role="tablist" aria-label="Investigation sections"></div>
+    <div id="panel"></div>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/components.js"></script>
+  <script src="../js/investigation.js"></script>
+</body>
+</html>

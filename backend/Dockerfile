@@ -15,6 +15,5 @@ USER appuser
 
 EXPOSE 5000
 
-# --preload: create_app() (table creation + demo seed) runs once in the master,
-# not once per worker.
-CMD ["gunicorn", "--preload", "--workers", "2", "--bind", "0.0.0.0:5000", "--access-logfile", "-", "app:app"]
+CMD ["uvicorn", "app:asgi_app", "--host", "0.0.0.0", "--port", "5000", "--workers", "2"]
+

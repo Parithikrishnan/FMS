@@ -51,7 +51,12 @@ def create_app(config: type = Config) -> Flask:
     return app
 
 
+from asgiref.wsgi import WsgiToAsgi
+
 app = create_app()
+asgi_app = WsgiToAsgi(app)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    import uvicorn
+    uvicorn.run("app:asgi_app", host="0.0.0.0", port=5000, reload=True)
+
